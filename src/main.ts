@@ -15,6 +15,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const securityConfig = getSecurityConfig(configService);
 
+  
+  // Enable trust proxy for express-rate-limit to handle X-Forwarded-For header
+  app.getHttpAdapter().getInstance().set('trust proxy', true);
   // Security middleware 
   app.use(helmet(securityConfig.helmet));
 
