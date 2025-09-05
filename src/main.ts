@@ -15,9 +15,11 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const securityConfig = getSecurityConfig(configService);
 
-  
-  // Enable trust proxy for express-rate-limit to handle X-Forwarded-For header
-  app.getHttpAdapter().getInstance().set('trust proxy', true);
+  // Enable trust proxy only in production (Railway)
+  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+  if (isProduction) {
+    app.getHttpAdapter().getInstance().set('trust proxy', true);
+  }
   // Security middleware 
   app.use(helmet(securityConfig.helmet));
 
@@ -61,6 +63,10 @@ async function bootstrap() {
     .build();
   const documentation = SwaggerModule.createDocument(app, swagger);
   SwaggerModule.setup("swagger", app, documentation)
-  await app.listen(configService.get<number>('PORT') || 3000);
+  // Listen on Railway-provided port and host
+  const port = configService.get<number>('PORT') || 3000;
+  await app.listen(port, '0.0.0.0', () => {
+    console.log(`Application is running on port ${port}`);
+  });
 }
 bootstrap();
