@@ -444,9 +444,9 @@ If you hit rate limits:
 ## 📝 API Documentation
 
 ### Base URL
-```
-[[https://expanders360api-production-db5b.up.railway.app/swagger]](https://expanders360api-production-db5b.up.railway.app/swagger)
-```
+
+[https://expanders360api-production-db5b.up.railway.app/swagger](https://expanders360api-production-db5b.up.railway.app/swagger)
+
 
 ### Authentication
 All protected endpoints require JWT token in Authorization header:
