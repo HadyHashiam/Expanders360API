@@ -16,10 +16,8 @@ async function bootstrap() {
   const securityConfig = getSecurityConfig(configService);
 
   // Enable trust proxy only in production (Railway)
-  const isProduction = configService.get<string>('NODE_ENV') === 'production';
-  if (isProduction) {
-    app.getHttpAdapter().getInstance().set('trust proxy', true);
-  }
+  app.getHttpAdapter().getInstance().set('trust proxy', 1); 
+
   // Security middleware 
   app.use(helmet(securityConfig.helmet));
 
