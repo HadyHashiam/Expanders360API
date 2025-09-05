@@ -445,7 +445,7 @@ If you hit rate limits:
 
 ### Base URL
 ```
-[https://expanders360api-production-db5b.up.railway.app/swagger]
+[[https://expanders360api-production-db5b.up.railway.app/swagger]](https://expanders360api-production-db5b.up.railway.app/swagger)
 ```
 
 ### Authentication
