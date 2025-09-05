@@ -445,7 +445,7 @@ If you hit rate limits:
 
 ### Base URL
 ```
-http://localhost:3000/api/v1
+https://expanders360api-production-db5b.up.railway.app/swagger
 ```
 
 ### Authentication
