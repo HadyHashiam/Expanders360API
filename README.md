@@ -149,8 +149,8 @@ Below is a list of the main API endpoints provided by the application. All endpo
 | POST   | `/auth/register` | Register a new user and send email with confirm-token | Public |
 | POST   | `/auth/verify-email/:token` | Verify a user's email using provided token to activate account | Public |
 | POST   | `/auth/refresh` | Generate a new JWT access token using a valid refresh token | Public |
-| POST   | `/auth/logout` | Invalidate the current session for a user, logging them out | Public |
-| POST   | `/auth/logoutAllDevices` | Invalidate all sessions for a user across all devices | Public |
+| POST   | `/auth/logout` | Invalidate the current session for a user, logging them out |  Admin or Client |
+| POST   | `/auth/logoutAllDevices` | Invalidate all sessions for a user across all devices |  Admin or Client |
 | POST   | `/auth/forgotPassword` | Initiate password reset process and send reset code email | Public |
 | POST   | `/auth/verifyResetCode` | Verify the password reset code sent to the user's email | Public |
 | POST   | `/auth/resetPassword` | Verify the password reset code sent to the user's email | Public |
@@ -167,7 +167,7 @@ Below is a list of the main API endpoints provided by the application. All endpo
 | POST   | `/projects/:id/matches/rebuild` | Rebuild matches for a specific project based on vendor compatibility | Admin or Client owner |
 | GET    | `/projects/:id/matches/all` | Get all matches for a specific project | Admin or Client |
 | GET    | `/matches` | Retrieve all matches with optional filtering and pagination | Admin only |
-| GET    | `/matches/:id` | Get a specific match by ID | Admin only |
+| GET    | `/matches/:id` | Get a specific match by ID | Admin or Client owner |
 | DELETE | `/matches/:id` | Delete a specific match by ID | Admin only |
 | POST   | `/system-configs` | Create a new System-config | Admin only |
 | GET    | `/system-configs` | Retrieve all System-configs | Admin only |
@@ -175,8 +175,8 @@ Below is a list of the main API endpoints provided by the application. All endpo
 | Patch  | `/system-configs/:id` |  Update a specific System-config by ID | Admin only |
 | DELETE | `/system-configs/:id` | Delete a specific System-config by ID | Admin only |
 | GET    | `/analytics/top-vendors` | Retrieve top 3 vendors per country with average match scores and document counts | Admin only |
-| POST   | `/documents/upload` | Upload a document for a project | Client |
-| GET    | `/documents/:projectId` | Get all documents for a project | Client |
+| POST   | `/documents/upload` | Upload a document for a project | Admin or Client |
+| GET    | `/documents/:projectId` | Get all documents for a project | Admin or Client |
 .. etc
 
 ## 🧮 Matching Formula
