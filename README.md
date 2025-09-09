@@ -98,27 +98,19 @@ erDiagram
         number clientId FK
         string title
         string description
-        number countryId FK
+        string country
         number budget
         string status "EXPANSION, ACTIVE. ..etc"
-        number[] services_needed
+        string[] services_needed
     }
     Vendors {
         number id PK
         string name
         string email
-        number[] countries_supported
-        number[] services_offered
+        string[] countries_supported
+        string[] services_offered
         number rating
         number response_sla_hours
-    }
-    Countries {
-        number id PK
-        string name (unique)
-    }
-    Services {
-        number id PK
-        string name (unique)
     }
     Matches {
         number id PK
