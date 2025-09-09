@@ -265,6 +265,12 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=
 EMAIL_PASSWORD=
+
+# Cloudinary Config
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
 ```
 
 
@@ -306,24 +312,33 @@ npm run start:dev
 
 ```
 src/
-├── Modules/                 # Feature modules
+├── Modules/                # Feature modules
+│   ├── analytics/          # Analytics & reporting
 │   ├── auth/               # Authentication & authorization
-│   ├── users/              # User management
-│   ├── documents/          # File management
+│   ├── countries/          # countries management
+│   ├── documents/          # documents management
+│   ├── mailer/             # mailer management
+│   ├── mail/               # mail management
 │   ├── projects/           # Project management
 │   ├── matches/            # Matching system
-│   ├── analytics/          # Analytics & reporting
+│   ├── scheduler/          # scheduler management
+│   ├── services/           # services management
+│   ├── system-config/      # system-config management
+│   ├── users/              # User management
 │   └── vendor/             # Vendor management
-├── config/                  # Configuration files
+├── config/                 # Configuration files
 │   ├── database.config.ts  # Database configuration
 │   ├── jwt.config.ts       # JWT configuration
 │   └── security.config.ts  # Security settings
-├── utils/                   # Utility functions
+├── migration/              # Migration file
+├── Seeds/                  # Seed Data
+├── utils/                  # Utility functions
 │   ├── apifeature/         # Pagination - Search - Sort - Filter
 │   ├── handlerFactory/     # CURD Factory
 │   ├── interfaces/         # validate  interfaces
 │   ├── middleware/         # Custom middleware
 │   ├── pipes/              # Validation pipes
+│   ├── types/              # types
 │   └── interceptors/       # Response interceptors
 └── main.ts                 # Application entry point
 ```
@@ -451,7 +466,7 @@ If you hit rate limits:
 
 ### Base URL
 ```
-http://localhost:3000/api/v1
+https://expanders360api-production-db5b.up.railway.app/swagger
 ```
 
 ### Authentication
