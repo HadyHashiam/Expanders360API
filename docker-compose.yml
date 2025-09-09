@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: app_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_pass
+      POSTGRES_ROOT_PASSWORD: root123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db -h postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - app_network
+
+  mongodb:
+    image: mongo:6.0
+    container_name: app_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: app_docs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongodb/init:/docker-entrypoint-initdb.d
+    networks:
+      - app_network
+
+  app:
+    build: .
+    container_name: app_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: app_user
+      DB_PASSWORD: app_pass
+      DB_NAME: app_db
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/app_docs?authSource=admin
+      # JWT_REFRESH_EXPIRE_TIME: 7d
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER: 
+      EMAIL_PASSWORD: 
+      EMAIL_SECURE: false
+      # SESSION_SECRET: 'this is my secret to hash express session'
+      # CLOUDINARY_CLOUD_NAME: 
+      # CLOUDINARY_API_KEY: your-api-key
+      # CLOUDINARY_API_SECRET: your-api-secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      seed:
+        condition: service_completed_successfully
+    networks:
+      - app_network
+
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: app_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@app.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "9090:80"
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  mongo-express:
+    image: mongo-express
+    container_name: app_mongo_express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin123@mongodb:27017/
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongodb
+    networks:
+      - app_network
+
+  # One-off service to run migrations and seeds before app starts
+  seed:
+    build: .
+    container_name: app_seed
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: app_user
+      DB_PASSWORD: app_pass
+      DB_NAME: app_db
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/app_docs?authSource=admin
+    command: >
+      sh -c "npm run migration:run && npm run seed && npm run seed:mongo"
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  pgadmin_data:
+
+networks:
+  app_network:
+    driver: bridge

@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  # App Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_dev
+    restart: unless-stopped
+    command: >
+          sh -c "npm run start:dev"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      seed:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: development
+      DB_USERNAME: App_user
+      DB_PASSWORD: App_pass
+      DB_NAME: App_db_dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/app_docs_dev?authSource=admin
+      # Updated Gmail SMTP settings
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER:
+      EMAIL_PASSWORD:
+      EMAIL_SECURE: false
+      SESSION_SECRET:
+      # CLOUDINARY_CLOUD_NAME: da2znmant
+      # CLOUDINARY_API_KEY: your-api-key
+      # CLOUDINARY_API_SECRET: your-api-secret
+
+    networks:
+      - app_dev_network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: app_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app_db_dev
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db_dev -h postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - app_dev_network
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: app_mongodb_dev
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: app_docs_dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+    networks:
+      - app_dev_network
+
+  # One-off service to run migrations and seeds
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app_seed_dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+    environment:
+      NODE_ENV: development
+      DB_USERNAME: app_user
+      DB_PASSWORD: app_pass
+      DB_NAME: app_db_dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/app_docs_dev?authSource=admin
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER:
+      EMAIL_PASSWORD:
+      EMAIL_SECURE: false
+      SESSION_SECRET:
+    command: >
+          sh -c "npm run migration:run && npm run seed && npm run seed:mongo"
+    networks:
+      - app_dev_network
+
+  # pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: app_pgadmin_dev
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@app.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "9090:80"
+    depends_on:
+      - postgres
+    networks:
+      - app_dev_network
+    volumes:
+      - pgadmin_dev_data:/var/lib/pgadmin
+
+  # MongoDB Express
+  mongo-express:
+    image: mongo-express
+    container_name: app_mongo_express_dev
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin123@mongodb:27017/
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongodb
+    networks:
+      - app_dev_network
+
+volumes:
+  postgres_dev_data:
+  mongodb_dev_data:
+  pgadmin_dev_data:
+
+networks:
+  app_dev_network:
+    driver: bridge
